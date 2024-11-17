@@ -6,7 +6,7 @@ require_once '../config.php';
 if (isset($_SESSION['admin_id'])) {
     // Prepare the SQL statement
     $sql = "
-    SELECT c.coordinator_id, c.username, c.firstname, c.lastname, c.email, c.createdAt, d.department_name
+    SELECT c.coordinator_id, c.username, c.firstname, c.lastname, c.email, c.createdAt, d.department_name, c.status
     FROM tbl_coordinators c
     JOIN tbl_departments d ON c.department_id = d.department_id
     ";

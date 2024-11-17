@@ -79,6 +79,7 @@ include 'includes/top_include.php';
                                         <th>First Name</th>
                                         <th>Last Name</th>
                                         <th>Email</th>
+                                        <th>Status</th>
                                         <th>Member Since</th>
                                         <th>Action</th>
                                     </tr>
@@ -105,16 +106,27 @@ include 'includes/top_include.php';
                                                 <?php echo $coordinator['email']; ?>
                                             </td>
                                             <td>
+                                                <center>
+                                                    <?php
+                                                    if ($coordinator['status'] == "Inactive"): ?>
+                                                        <span class="badge bg-danger">Inactive</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-success">Active</span>
+                                                    <?php endif; ?>
+                                                </center>
+                                            </td>
+                                            <td>
                                                 <?php echo $coordinator['createdAt']; ?>
                                             </td>
                                             <td>
                                                 <a href="handles.php?co_id=<?php echo $coordinator['coordinator_id'] ?>"
                                                     class="btn-get-main" style="text-decoration:none; color:white;"><i
                                                         class="fa-solid fa-users"></i> Handles </a>
-                                                <button class="btn-get-del" data-toggle="modal" data-target="#DeleteModal"
+                                                <button class="btn-get-del edit-btn" data-toggle="modal"
+                                                    data-target="#editAvailability"
                                                     data-coordinator-id="<?php echo $coordinator['coordinator_id'] ?>"><i
-                                                        class="fa-solid fa-trash"></i>
-                                                    Delete</button>
+                                                        class="fa-solid fa-pen-to-square"></i>
+                                                    Update Status</button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -211,6 +223,40 @@ include 'includes/top_include.php';
     </div>
 
 
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editAvailability" tabindex="-1" role="dialog"
+        aria-labelledby="editAvailabilityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAvailabilityModalLabel">Edit Availability</h5>
+                    <i class="fa-solid fa-xmark" style="font-size:20px; cursor:pointer;" data-dismiss="modal"
+                        aria-label="Close"></i>
+                </div>
+                <div class="modal-body">
+                    <div id="editMessage"></div>
+
+                    <!-- Edit form -->
+                    <div id="editPackageForm">
+
+                        <!-- Dropdown for availability -->
+                        <div class="form-group">
+                            <label for="edit_availability">Availability:</label>
+                            <select class="form-control" id="edit_availability" name="edit_availability">
+
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-get-del" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn-get-main" id="saveChangesBtn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 
 
@@ -231,6 +277,7 @@ include 'includes/top_include.php';
     <script src="assets/js/datatables-simple-demo.js"></script>
     <script src="functions/js/add-coordinators.js"></script>
     <script src="functions/js/delete-coordinators.js"></script>
+    <script src="functions/js/edit-coordinator.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
 

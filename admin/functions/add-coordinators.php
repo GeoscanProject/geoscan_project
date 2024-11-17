@@ -67,7 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $coordinator_id = mt_rand(10000, 99999);
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    $sql = 'INSERT INTO tbl_coordinators (coordinator_id, username, firstname, lastname, email, department_id, password) VALUES (:coordinator_id, :username, :firstname, :lastname, :email, :department_id, :password)';
+    $status = "Active";
+
+    $sql = 'INSERT INTO tbl_coordinators (coordinator_id, username, firstname, lastname, email, status, department_id, password) VALUES (:coordinator_id, :username, :firstname, :lastname, :email, :status, :department_id, :password)';
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':coordinator_id', $coordinator_id, PDO::PARAM_STR);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
@@ -75,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':lastname', $lastname, PDO::PARAM_STR);
     $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':status', $status, PDO::PARAM_STR);
     $stmt->bindParam(':department_id', $department_id, PDO::PARAM_STR);
 
     if ($stmt->execute()) {
