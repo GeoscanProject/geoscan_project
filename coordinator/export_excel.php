@@ -1,12 +1,12 @@
 <?php
 
 require 'phpspreadsheet/vendor/autoload.php'; // Path to PhpSpreadsheet autoload
-
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
-require_once '../config.php'; // Include your database connection
+// Include your database connection
+require_once '../config.php';
 
 // Your TomTom API key
 $apiKey = 'ZWUFEvqrALs4WtVDTw4yjUGGjkFPTGGE';
@@ -14,43 +14,27 @@ $apiKey = 'ZWUFEvqrALs4WtVDTw4yjUGGjkFPTGGE';
 // Function to convert coordinates to address using TomTom API
 function convertCoordinates($latitude, $longitude) {
     global $apiKey; // Use global API key
-
-    // URL for TomTom Reverse Geocoding API
     $url = "https://api.tomtom.com/search/2/reverseGeocode/{$latitude},{$longitude}.json?key={$apiKey}";
 
-    // Make the HTTP request
     $response = @file_get_contents($url);
-
-    // Check if the response is valid
     if ($response === FALSE) {
         return "Error retrieving address";
     }
-
-    // Decode the JSON response
     $data = json_decode($response, true);
-
-    // Check if we have results
-    if (isset($data['addresses'][0]['address']['freeformAddress'])) {
-        return $data['addresses'][0]['address']['freeformAddress'];
-    } else {
-        return "Address not found";
-    }
+    return $data['addresses'][0]['address']['freeformAddress'] ?? "Address not found";
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get the form input
     $intern_id = $_POST['student_id'];
     $start_date = $_POST['start_date'];
     $end_date = $_POST['end_date'];
     $intern_name = $_POST['intern_name'];
     $intern_program = $_POST['intern_program'];
 
-    // Ensure inputs are not empty
     if (empty($intern_id) || empty($start_date) || empty($end_date)) {
         die('Invalid input');
     }
 
-    // Fetch data from the database
     try {
         $stmt = $pdo->prepare("
             SELECT type, timestamp, latitude, longitude
@@ -65,64 +49,76 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (!$data) {
-            die('No data found for the given criteria.');
+            die('No records found');
         }
 
-        // Create a new Spreadsheet object
+        // Create Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Time Logs');
 
-        // Set header row
-        $sheet->setCellValue('A1', 'Intern Name: ' . $intern_name);
-        $sheet->setCellValue('A2', 'Program: ' . $intern_program);
-        $sheet->setCellValue('A3', 'Type');
-        $sheet->setCellValue('B3', 'Date');
-        $sheet->setCellValue('C3', 'Time');
-        $sheet->setCellValue('D3', 'Address');
+        // Set Document Properties
+        $spreadsheet->getProperties()
+            ->setCreator("Your Name")
+            ->setTitle("Intern Report")
+            ->setSubject("Intern Report")
+            ->setDescription("Generated intern report with details and logs.");
 
-        // Populate the spreadsheet with data
-        $row = 4;
+        // Header Section
+        $sheet->setCellValue('A1', 'Intern Report')->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->setCellValue('A3', 'Intern Name:')->setCellValue('B3', $intern_name);
+        $sheet->setCellValue('A4', 'Program:')->setCellValue('B4', $intern_program);
+        $sheet->setCellValue('A5', 'Report Period:')->setCellValue('B5', "$start_date to $end_date");
+
+        // Table Headers
+        $sheet->setCellValue('A7', 'Type')
+              ->setCellValue('B7', 'Date')
+              ->setCellValue('C7', 'Time')
+              ->setCellValue('D7', 'Location');
+        $sheet->getStyle('A7:D7')->getFont()->setBold(true);
+
+        // Add Data
+        $rowNumber = 8; // Start from row 8
         foreach ($data as $record) {
-            // Format timestamp
             $dateTime = new DateTime($record['timestamp']);
             $formattedDate = $dateTime->format('F j, Y');
             $formattedTime = $dateTime->format('g:iA');
+            $address = convertCoordinates($record['latitude'], $record['longitude']);
+
             $typeLabel = $record['type'] === 'time_in' ? 'Time In' : 'Time Out';
 
-            $address = convertCoordinates($record['latitude'], $record['longitude']);
-            
-            $sheet->setCellValueExplicit('A' . $row, $typeLabel, DataType::TYPE_STRING);
-            $sheet->setCellValue('B' . $row, $formattedDate);
-            $sheet->setCellValue('C' . $row, $formattedTime);
-            $sheet->setCellValueExplicit('D' . $row, $address, DataType::TYPE_STRING);
-
-            $row++;
+            $sheet->setCellValue("A$rowNumber", $typeLabel);
+            $sheet->setCellValue("B$rowNumber", $formattedDate);
+            $sheet->setCellValue("C$rowNumber", $formattedTime);
+            $sheet->setCellValue("D$rowNumber", $address);
+            $rowNumber++;
         }
 
-        // Send the file to the browser
+        // Set Column Widths
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Set Borders for Table
+        $tableRange = "A7:D" . ($rowNumber - 1);
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+              ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Generate File
         $writer = new Xlsx($spreadsheet);
-        $filename = 'TimeLogs_' . date('YmdHis') . '.xlsx';
+        $fileName = "Intern_Report_{$intern_name}.xlsx";
 
-        // Clear the output buffer to avoid any additional output
-        if (ob_get_length()) {
-            ob_end_clean();
-        }
-
-        // Set headers for file download
+        // Send Download Headers
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header("Content-Disposition: attachment; filename=\"$fileName\"");
         header('Cache-Control: max-age=0');
 
-        // Write the file to the output
         $writer->save('php://output');
-        exit();
+        exit;
+
     } catch (Exception $e) {
-        // Handle exceptions
-        error_log('Error generating the Excel file: ' . $e->getMessage());
-        die('Error generating the Excel file.');
+        error_log("Error: " . $e->getMessage());
+        die('Error generating Excel report.');
     }
-} else {
-    die('Invalid request method.');
 }
 ?>

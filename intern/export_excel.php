@@ -71,18 +71,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Create a new Spreadsheet object
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Time Logs');
+        $sheet->setTitle('Intern Time Logs');
 
-        // Set header row
-        $sheet->setCellValue('A1', 'Intern Name: ' . $intern_name);
-        $sheet->setCellValue('A2', 'Program: ' . $intern_program);
-        $sheet->setCellValue('A3', 'Type');
-        $sheet->setCellValue('B3', 'Date');
-        $sheet->setCellValue('C3', 'Time');
-        $sheet->setCellValue('D3', 'Address');
+        // Set Document Properties
+        $spreadsheet->getProperties()
+            ->setCreator("Your Name")
+            ->setTitle("Intern Time Logs Report")
+            ->setSubject("Intern Report")
+            ->setDescription("Generated intern time logs report with details and logs.");
+
+        // Header Section
+        $sheet->setCellValue('A1', 'Intern Time Logs Report')->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->setCellValue('A3', 'Intern Name:')->setCellValue('B3', $intern_name);
+        $sheet->setCellValue('A4', 'Program:')->setCellValue('B4', $intern_program);
+        $sheet->setCellValue('A5', 'Report Period:')->setCellValue('B5', "$start_date to $end_date");
+
+        // Table Headers
+        $sheet->setCellValue('A7', 'Type')
+              ->setCellValue('B7', 'Date')
+              ->setCellValue('C7', 'Time')
+              ->setCellValue('D7', 'Location');
+        $sheet->getStyle('A7:D7')->getFont()->setBold(true);
 
         // Populate the spreadsheet with data
-        $row = 4;
+        $row = 8; // Start from row 8
         foreach ($data as $record) {
             // Format timestamp
             $dateTime = new DateTime($record['timestamp']);
@@ -92,24 +105,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $address = convertCoordinates($record['latitude'], $record['longitude']);
             
+            // Add data to the cells
             $sheet->setCellValueExplicit('A' . $row, $typeLabel, DataType::TYPE_STRING);
             $sheet->setCellValue('B' . $row, $formattedDate);
             $sheet->setCellValue('C' . $row, $formattedTime);
             $sheet->setCellValueExplicit('D' . $row, $address, DataType::TYPE_STRING);
-
+            
             $row++;
         }
 
-        // Send the file to the browser
-        $writer = new Xlsx($spreadsheet);
-        $filename = 'TimeLogs_' . date('YmdHis') . '.xlsx';
-
-        // Clear the output buffer to avoid any additional output
-        if (ob_get_length()) {
-            ob_end_clean();
+        // Set Column Widths
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        // Set headers for file download
+        // Set Borders for Table
+        $tableRange = "A7:D" . ($row - 1);
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+              ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+        // Generate File
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Intern_Time_Logs_Report_' . date('YmdHis') . '.xlsx';
+
+        // Send the file to the browser
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $filename . '"');
         header('Cache-Control: max-age=0');

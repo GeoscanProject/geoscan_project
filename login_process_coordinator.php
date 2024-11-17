@@ -1,7 +1,6 @@
 <?php
 require 'config.php';
 
-
 $data = json_decode(file_get_contents('php://input'), true);
 
 $username = $data['username'] ?? '';
@@ -18,7 +17,13 @@ try {
     $user = $stmt->fetch();
 
     if ($user) {
-        // Compare plain text pin
+        // Check if coordinator is active
+        if ($user['status'] === 'Inactive') {
+            echo json_encode(['success' => false, 'message' => 'Your account is currently inactive. Kindly contact your admin for further assistance.']);
+            exit;
+        }
+
+        // Compare plain text password
         if (password_verify($password, $user['password'])) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['firstname'] = $user['firstname'];
