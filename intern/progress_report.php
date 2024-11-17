@@ -68,15 +68,19 @@ $progress = getInternProgress($student_id, $program_id, $pdo);
   </div><!-- End Page Title -->
   <div class="d-grid gap-2 d-md-flex justify-content-md-end">
     <button class="btn btn-success me-md-2" type="button">
-      <a href="generate_report.php" style="color:white;"><i class="ri-folder-download-line" style="color: #fff;"></i> Generate Report</a>
+      <a href="generate_report.php" style="color:white;"><i class="ri-folder-download-line" style="color: #fff;"></i>
+        Generate Report</a>
     </button>
   </div><br>
   <div class="col-xl-12">
 
     <div class="card">
-      <style>
+      <div style="padding: 20px;">
+        <p><strong>Total Hours Rendered:</strong> <?php echo $progress['total_hours']; ?> hours</p>
+        <p><strong>Hours Remaining:</strong> <?php echo $progress['hours_remaining']; ?> hours</p>
+        <p><strong>Required Hours:</strong> <?php echo $progress['required_hours']; ?> hours</p>
+      </div>
 
-      </style>
 
       <div class="card-body">
         <canvas id="progressChart" class="small-chart"></canvas> <!-- Apply the CSS class -->

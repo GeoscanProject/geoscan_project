@@ -134,27 +134,54 @@ include "crypt_helper.php";
                   <select class="form-select" name="program_id" id="floatingSelect" aria-label="State">
                     <option selected disabled>Select Program</option>
                     <?php
-                      // Ensure the department_id is set in the session
-                      if (isset($_SESSION['department_id'])) {
-                          // Fetching programs from the database using a prepared statement
-                          $query = "SELECT program_id, program_name FROM tbl_programs WHERE department_id = :department_id";
-                          $stmt = $pdo->prepare($query);
-                          $stmt->bindParam(':department_id', $_SESSION['department_id'], PDO::PARAM_INT);
-                          $stmt->execute();
-                          
-                          // Fetch results and populate the options
-                          while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                              echo '<option value="' . htmlspecialchars($row['program_id']) . '">' . htmlspecialchars($row['program_name']) . '</option>';
-                          }
-                      } else {
-                          // Handle the case where department_id is not set
-                          echo '<option value="" disabled>No Programs Available</option>';
+                    // Ensure the department_id is set in the session
+                    if (isset($_SESSION['department_id'])) {
+                      // Fetching programs from the database using a prepared statement
+                      $query = "SELECT program_id, program_name FROM tbl_programs WHERE department_id = :department_id";
+                      $stmt = $pdo->prepare($query);
+                      $stmt->bindParam(':department_id', $_SESSION['department_id'], PDO::PARAM_INT);
+                      $stmt->execute();
+
+                      // Fetch results and populate the options
+                      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        echo '<option value="' . htmlspecialchars($row['program_id']) . '">' . htmlspecialchars($row['program_name']) . '</option>';
                       }
-                      ?>
+                    } else {
+                      // Handle the case where department_id is not set
+                      echo '<option value="" disabled>No Programs Available</option>';
+                    }
+                    ?>
                   </select>
                   <label for="floatingSelect">Program</label>
                 </div>
               </div>
+              <div class="col-md-12">
+                <div class="form-floating mb-3">
+                  <select class="form-select" name="company_id" id="floatingSelect" aria-label="State">
+                    <option selected disabled>Select Company</option>
+                    <?php
+                    // Fetching all companies from the database using a prepared statement
+                    $query = "SELECT company_id, company_name FROM tbl_companies";
+                    $stmt = $pdo->prepare($query);
+                    $stmt->execute();
+
+                    // Check if there are companies available
+                    $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    if ($companies) {
+                      // Populate the options with available companies
+                      foreach ($companies as $row) {
+                        echo '<option value="' . htmlspecialchars($row['company_id']) . '">' . htmlspecialchars($row['company_name']) . '</option>';
+                      }
+                    } else {
+                      // Handle the case where no companies are found
+                      echo '<option value="" disabled>No Company Available</option>';
+                    }
+                    ?>
+                  </select>
+                  <label for="floatingSelect">Company</label>
+                </div>
+              </div>
+
               <div class="col-md-2">
                 <div class="form-floating">
                   <input type="number" class="form-control" name="student_id" pattern="\d{4}" id="floatingName"
@@ -176,30 +203,59 @@ include "crypt_helper.php";
               </div>
               <div class="col-md-12">
                 <div class="form-floating">
-                  <input type="text" class="form-control" name="email" id="floatingName" placeholder="" required>
+                  <input type="email" class="form-control" name="email" id="floatingName" placeholder="" required>
                   <label for="floatingName">Email</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating">
-                  <input type="text" class="form-control" name="phone" id="floatingName" placeholder="" required>
+                <input type="number" class="form-control" name="phone" id="floatingName" placeholder="Phone" required pattern="\d+" title="Only numeric values are allowed.">
+
                   <label for="floatingName">Phone</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-floating">
+                  <input type="text" class="form-control" name="unit_block" id="floatingUnitBlock"
+                    placeholder="Unit/Block">
+                  <label for="floatingUnitBlock">Unit/Block</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-floating">
+                  <input type="text" class="form-control" name="subdivision" id="floatingSubdivision"
+                    placeholder="Subdivision">
+                  <label for="floatingSubdivision">Subdivision (if applicable)</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-floating">
+                  <input type="text" class="form-control" name="barangay" id="floatingBarangay" placeholder="Barangay"
+                    required>
+                  <label for="floatingBarangay">Barangay</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating">
-                  <input type="text" class="form-control" name="address" id="floatingName" placeholder="" required>
-                  <label for="floatingName">Address</label>
+                  <input type="text" class="form-control" name="city" id="floatingCity" placeholder="City" required>
+                  <label for="floatingCity">City</label>
                 </div>
               </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text" class="form-control" name="province" id="floatingProvince" placeholder="Province"
+                    required>
+                  <label for="floatingProvince">Province</label>
+                </div>
+              </div>
+
               <!---------    COORDINATOR         ---------------->
               <input type="text" class="form-control"
                 value="<?php echo htmlspecialchars($_SESSION['coordinator_id']); ?>" name="coordinator_id"
                 id="floatingName" placeholder="" hidden>
               <!---------    STATUS         ---------------->
-                <input type="text" class="form-control"
-                value="Active" name="status"
-                id="floatingName" placeholder="" hidden>
+              <input type="text" class="form-control" value="Active" name="status" id="floatingName" placeholder=""
+                hidden>
 
               <div class="text-center">
                 <button type="submit" class="btn btn-success"><i class="ri-send-plane-fill"></i>&nbsp;Submit</button>
@@ -217,9 +273,10 @@ include "crypt_helper.php";
 
     <?php
     $stmt = $pdo->prepare("
-            SELECT u.student_id, u.firstname, u.lastname, u.profile_pic, c.program_name , c.program_hour
+            SELECT u.student_id, u.firstname, u.lastname, u.profile_pic, c.program_name , c.program_hour, d.company_name, u.createdAt
             FROM tbl_users u
             JOIN tbl_programs c ON u.program_id = c.program_id
+            LEFT JOIN tbl_companies d ON u.company_id = d.company_id
             WHERE u.coordinator_id = " . $_SESSION['coordinator_id'] . "
         ");
     $stmt->execute();
@@ -235,22 +292,25 @@ include "crypt_helper.php";
               <th>Student ID</th>
               <th>Student Name</th>
               <th>Program</th>
+              <th>Designated Company</th>
               <th>Hours to render</th>
+              <th>Date Registered</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <?php foreach ($users as $user): ?>
               <tr>
-                <td><img src="../intern/uploads/profile_pics/<?php echo $user['profile_pic'] ? htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') : 'profile.png'; ?>" 
-                  alt="Profile Picture" 
-                  width="40" 
-                  height="40">
+                <td><img
+                    src="../intern/uploads/profile_pics/<?php echo $user['profile_pic'] ? htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') : 'profile.png'; ?>"
+                    alt="Profile Picture" width="40" height="40">
                 </td>
                 <td><?php echo htmlspecialchars($user['student_id']); ?></td>
                 <td><?php echo htmlspecialchars($user['firstname'] . ' ' . $user['lastname']); ?></td>
                 <td><?php echo htmlspecialchars($user['program_name']); ?></td>
+                <td><?php echo htmlspecialchars($user['company_name']); ?></td>
                 <td><?php echo htmlspecialchars($user['program_hour']); ?></td>
+                <td><?php echo htmlspecialchars($user['createdAt']); ?></td>
                 <td>
                   <a href="view_intern.php?student_id=<?php echo urlencode(encryptData($user['student_id'])); ?>"
                     class="btn btn-success btn-sm"><i class="bi bi-eye"></i> View</a>

@@ -137,13 +137,17 @@ include_once '../includes/getAddress.php';
 <style>
   /* Ensure the modal image fits well */
   .modal-body {
-    text-align: center; /* Center the image in the modal */
+    text-align: center;
+    /* Center the image in the modal */
   }
 
   #modalImage {
-    max-width: 100%; /* Ensure the image doesn't overflow the modal */
-    max-height: 80vh; /* Set a max height to avoid excessive height */
-    object-fit: contain; /* Maintain aspect ratio while fitting inside the modal */
+    max-width: 100%;
+    /* Ensure the image doesn't overflow the modal */
+    max-height: 80vh;
+    /* Set a max height to avoid excessive height */
+    object-fit: contain;
+    /* Maintain aspect ratio while fitting inside the modal */
   }
 </style>
 
@@ -191,20 +195,23 @@ include_once '../includes/getAddress.php';
             data.forEach(log => {
               const row = document.createElement('tr');
               row.innerHTML = `
-                <td>${log.firstname} ${log.lastname}</td>
-                <td>${log.type === 'time_in' ? 'Time In' : 'Time Out'}</td>
-                <td>${log.timestamp}</td>
-                <td>
-                  ${log.photo !== 'N/A' ? `
-                    <img src="${log.photo}" alt="Photo" width="50" height="50" style="object-fit: cover; cursor: pointer;" onclick="openModal('${log.photo}')">
-                  ` : 'N/A'}
-                </td>
-                <td>
-                  <span class="addresss" data-lat="${log.latitude}" data-lng="${log.longitude}">
-                    <div class="address-container">Converting...</div>
-                  </span>
-                </td>
-              `;
+            <td>${log.firstname} ${log.lastname}</td>
+            <td>${log.type === 'time_in' ? 'Time In' : 'Time Out'}</td>
+            <td>${log.timestamp}</td>
+            <td>
+              ${log.pin
+                  ? (log.photo !== 'N/A'
+                    ? `<img src="${log.photo}" alt="Photo" width="50" height="50" style="object-fit: cover; cursor: pointer;" onclick="openModal('${log.photo}')">`
+                    : 'N/A')
+                  : 'Fingerprint used'
+                }
+            </td>
+            <td>
+              <span class="addresss" data-lat="${log.latitude}" data-lng="${log.longitude}">
+                <div class="address-container">Converting...</div>
+              </span>
+            </td>
+          `;
               tbodys.appendChild(row);
             });
 
@@ -224,6 +231,7 @@ include_once '../includes/getAddress.php';
         console.error('Element with id "logsTableBody" not found');
       }
     }
+
 
     // Load table data initially
     loadTableData();

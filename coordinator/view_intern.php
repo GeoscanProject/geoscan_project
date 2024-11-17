@@ -16,7 +16,7 @@ include "crypt_helper.php";
 
   <ul class="sidebar-nav" id="sidebar-nav">
 
-  <li class="nav-item">
+    <li class="nav-item">
       <a class="nav-link collapsed" href="index.php">
         <i class="bi bi-grid"></i>
         <span>Dashboard</span>
@@ -103,12 +103,13 @@ include "crypt_helper.php";
 
     // Fetch the user's details using the decrypted $student_id
     $stmt = $pdo->prepare("
-      SELECT u.student_id, u.firstname, u.lastname, u.email, u.phone, u.address, u.coordinator_id, u.credential_id, u.profile_pic,
+      SELECT u.student_id, u.firstname, u.lastname, u.email, u.phone, u.address, u.coordinator_id, u.credential_id, u.profile_pic, d.company_name,
           c.program_id, c.program_name, 
           co.firstname AS coordinator_firstname, co.lastname AS coordinator_lastname
       FROM tbl_users u
       JOIN tbl_programs c ON u.program_id = c.program_id
       LEFT JOIN tbl_coordinators co ON u.coordinator_id = co.coordinator_id
+      LEFT JOIN tbl_companies d ON u.company_id = d.company_id
       WHERE u.student_id = :student_id
   ");
     $stmt->bindParam(':student_id', $student_id);
@@ -128,7 +129,9 @@ include "crypt_helper.php";
             <div class="card">
               <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
-              <img src="../intern/uploads/profile_pics/<?php echo $user['profile_pic'] ? htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') : 'profile.png'; ?>" width="100" height="100">
+                <img
+                  src="../intern/uploads/profile_pics/<?php echo $user['profile_pic'] ? htmlspecialchars($user['profile_pic'], ENT_QUOTES, 'UTF-8') : 'profile.png'; ?>"
+                  width="100" height="100">
 
                 <h2><?php echo htmlspecialchars($user['firstname'] . " " . $user['lastname']); ?></h2>
                 <h3>Intern</h3>
@@ -164,8 +167,13 @@ include "crypt_helper.php";
                     </div>
 
                     <div class="row">
-                      <div class="col-lg-3 col-md-4 label">program</div>
+                      <div class="col-lg-3 col-md-4 label">Program</div>
                       <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($user['program_name']); ?></div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-3 col-md-4 label">Designated Company</div>
+                      <div class="col-lg-9 col-md-8"><?php echo htmlspecialchars($user['company_name']); ?></div>
                     </div>
 
                     <div class="row">

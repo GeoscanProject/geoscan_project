@@ -24,6 +24,16 @@ foreach ($interns as $intern) {
         'progress' => getInternProgress($intern['student_id'], $intern['program_id'], $pdo)
     ];
 }
+
+// Sort the interns by rendered hours (total_hours) in descending order
+usort($progressData, function($a, $b) {
+    return $b['progress']['total_hours'] - $a['progress']['total_hours'];
+});
+
+// Separate top 5 interns with rendered hours
+$top5Interns = array_slice($progressData, 0, 5);
+$otherInterns = array_slice($progressData, 5);
+
 ?>
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
 <link href="../assets/css/table.css" rel="stylesheet">
@@ -141,7 +151,6 @@ foreach ($interns as $intern) {
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
     crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     // Fetch progress data from PHP
     const progressData = <?php echo json_encode($progressData); ?>;
@@ -214,5 +223,4 @@ foreach ($interns as $intern) {
         });
     });
 </script>
-
 <?php include "footer.php"; ?>
