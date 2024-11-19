@@ -155,7 +155,7 @@ $progress = getInternProgress($student_id, $program_id, $pdo);
             <div class="ps-3">
               <h5>0</h5>
               <span class="text-muted small pt-2 ps-1">
-                <a href="requirements_to_review.php">
+                <a href="my_attendance.php">
                   <i class="bi bi-arrow-right"></i> &nbsp;View All
                 </a>
               </span>
@@ -177,7 +177,7 @@ $progress = getInternProgress($student_id, $program_id, $pdo);
             <div class="ps-3">
               <h5>0</h5>
               <span class="text-muted small pt-2 ps-1">
-                <a href="requirements_to_review.php">
+                <a href="requirement_checklist.php">
                   <i class="bi bi-arrow-right"></i> &nbsp;View All
                 </a>
               </span>

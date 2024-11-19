@@ -183,7 +183,7 @@ $currentDate = date('Y-m-d');
                   <div class="ps-3">
                     <h6><?php echo $count; ?></h6>
                     <span class="text-muted small pt-2 ps-1">
-                      <a href="#">
+                      <a href="attendance_today.php">
                         <i class="bi bi-arrow-right"></i> &nbsp;View All
                       </a>
                     </span>

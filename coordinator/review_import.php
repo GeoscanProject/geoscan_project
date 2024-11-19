@@ -1,4 +1,5 @@
 <?php
+
 if (isset($_POST['action']) && $_POST['action'] === 'clear') {
   // Clear session data related to import
   unset($_SESSION['import_data']);
@@ -167,6 +168,39 @@ include "nav.php";
 </main><!-- End #main -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const saveButton = document.querySelector('[name="save"]');
+
+    saveButton.addEventListener('click', function(e) {
+        const studentIds = [];
+        let hasDuplicates = false;
+
+        // Get all student IDs from the table rows
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            const studentId = row.cells[1].textContent.trim(); // Get Student ID from second column
+            if (studentIds.includes(studentId)) {
+                hasDuplicates = true;
+            } else {
+                studentIds.push(studentId);
+            }
+        });
+
+        // If duplicates are found, prevent form submission and show an alert
+        if (hasDuplicates) {
+            e.preventDefault(); // Prevent form submission
+            Swal.fire({
+                title: 'Error!',
+                text: 'Duplicate student IDs found! Please check the data.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+});
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');

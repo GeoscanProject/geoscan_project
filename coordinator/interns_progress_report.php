@@ -26,7 +26,7 @@ foreach ($interns as $intern) {
 }
 
 // Sort the interns by rendered hours (total_hours) in descending order
-usort($progressData, function($a, $b) {
+usort($progressData, function ($a, $b) {
     return $b['progress']['total_hours'] - $a['progress']['total_hours'];
 });
 
@@ -135,6 +135,11 @@ $otherInterns = array_slice($progressData, 5);
     <?php foreach ($progressData as $data): ?>
         <div class="col-xl-12 card-container">
             <div class="card">
+                <div style="padding: 20px;">
+                    <p><strong>Total Hours Rendered:</strong> <?php echo $data['progress']['total_hours']; ?> hours</p>
+                    <p><strong>Hours Remaining:</strong> <?php echo $data['progress']['hours_remaining']; ?> hours</p>
+                    <p><strong>Required Hours:</strong> <?php echo $data['progress']['required_hours']; ?> hours</p>
+                </div>
                 <div class="card-body">
                     <h5><b><?php echo htmlspecialchars($data['name']); ?></b></h5>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
