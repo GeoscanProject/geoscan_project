@@ -335,8 +335,6 @@ $currentDate = date('Y-m-d');
                   if (in_array($today, array_merge(...array_column($interns, 'dates')))) {
                     echo "
                     <div class='reminder-alert'>
-                        <span style='color:#198754;'><h3><b>Pending Time Out</b></h3></span>
-                        <p>You have not logged your time out for today (<strong>{$today}</strong>).</p>
                     </div>";
                   }
 
