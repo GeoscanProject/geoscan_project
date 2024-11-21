@@ -153,7 +153,7 @@ include 'includes/top_include.php';
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editAvailabilityModalLabel">Edit Availability</h5>
+                    <h5 class="modal-title" id="editAvailabilityModalLabel">Edit Information</h5>
                     <i class="fa-solid fa-xmark" style="font-size:20px; cursor:pointer;" data-dismiss="modal"
                         aria-label="Close"></i>
                 </div>
@@ -163,7 +163,49 @@ include 'includes/top_include.php';
                     <!-- Edit form -->
                     <div id="editPackageForm">
 
-                        <!-- Dropdown for availability -->
+                        <div class="form-group">
+                            <label for="edit_first_name">First Name:</label>
+                            <input type="text" class="form-control" id="edit_first_name" name="edit_first_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_last_name">Last Name:</label>
+                            <input type="text" class="form-control" id="edit_last_name" name="edit_last_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_email">Email:</label>
+                            <input type="email" class="form-control" id="edit_email" name="edit_email">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_phone">Phone:</label>
+                            <input type="number" class="form-control" id="edit_phone" name="edit_phone" required
+                                pattern="\d+" title="Only numeric values are allowed.">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_address">Address:</label>
+                            <input type="text" class="form-control" id="edit_address" name="edit_address">
+                        </div>
+                        <div id="companyDropdownContainer" class="form-group">
+                            <label for="company_id">Select Company:</label>
+                            <select class="form-control" id="edit_company_id" name="edit_company_id">
+                                <?php
+                                // Fetch companies from tbl_companies
+                                $sql = "SELECT company_id, company_name FROM tbl_companies";
+                                $stmt = $pdo->prepare($sql);
+                                $stmt->execute();
+                                $companys = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                // Display options if available, otherwise show message
+                                if ($companys) {
+                                    foreach ($companys as $company) {
+                                        echo '<option value="' . $company['company_id'] . '">' . $company['company_name'] . '</option>';
+                                    }
+                                } else {
+                                    echo '<option value="" disabled selected>No companies available. Please create a company first.</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label for="edit_availability">Availability:</label>
                             <select class="form-control" id="edit_availability" name="edit_availability">

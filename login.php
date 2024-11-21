@@ -24,7 +24,7 @@ if (isset($_SESSION['student_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css"
         integrity="sha512-pVCM5+SN2+qwj36KonHToF2p1oIvoU3bsqxphdOIWMYmgr4ZqD3t5DjKvvetKhXGc/ZG5REYTT6ltKfExEei/Q=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <style>
@@ -51,9 +51,18 @@ if (isset($_SESSION['student_id'])) {
                         <input type="text" class="form-control" id="student_id" name="student_id">
                     </div>
                     <div class="col-12">
-                        <label for="inputEmail4" class="form-label">Pin</label>
-                        <input type="password" class="form-control" id="pin" name="pin">
-                    </div><br><br>
+                        <label for="pin" class="form-label">Pin</label>
+                        <div class="position-relative">
+                            <input type="password" class="form-control" id="pin" name="pin" oninput="checkPinInput()">
+                            <button type="button"
+                                class="btn btn-light position-absolute top-50 end-0 translate-middle-y me-2"
+                                id="togglePinButton" style="display: none;" onclick="togglePinVisibility()">
+                                <i class="bx bx-show" id="togglePinIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <br><br>
                     <div class="d-grid gap-2 mt-3">
                         <button class="btn-main" style="border-radius: 5px;" type="submit">Login</button>
                     </div>
@@ -65,7 +74,8 @@ if (isset($_SESSION['student_id'])) {
                     <div id="message" class="message"></div>
                 </center>
                 <div class="text-center">
-                    <button type="button" class="btn btn-light rounded-pill"><a class="backbtn" href="./">Back</a></button>
+                    <button type="button" class="btn btn-light rounded-pill"><a class="backbtn"
+                            href="./">Back</a></button>
                 </div>
             </div>
         </div>
@@ -98,8 +108,18 @@ if (isset($_SESSION['student_id'])) {
                     </div>
                     <div class="col-12">
                         <label for="inputEmail4" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password">
+                        <div class="position-relative">
+                            <input type="password" class="form-control" id="password" name="password"
+                                oninput="checkPasswordInput('password')">
+                            <button type="button"
+                                class="btn btn-light position-absolute top-50 end-0 translate-middle-y me-2"
+                                id="togglePasswordButton" style="display: none;"
+                                onclick="togglePasswordVisibility('password')">
+                                <i class="bx bx-show" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="col-12">
                         <label for="roleSelect" class="form-label">Select Role</label>
                         <select class="form-control" id="role" name="role">
@@ -111,16 +131,18 @@ if (isset($_SESSION['student_id'])) {
                         <button class="btn-main" style="border-radius: 5px;" type="submit"> Login</button>
                     </div>
                     <div class="text-center">
-                        <a class="backbtn" href="" data-bs-toggle="modal" data-bs-target="#verticalycentered">Forgot Password?</a>
+                        <a class="backbtn" href="" data-bs-toggle="modal" data-bs-target="#verticalycentered">Forgot
+                            Password?</a>
                     </div>
-                    
+
                 </form>
 
                 <center>
                     <div id="officer_message" class="officer_message"></div>
                 </center>
                 <div class="text-center">
-                    <button type="button" class="btn btn-light rounded-pill"><a class="backbtn" href="./">Back</a></button>
+                    <button type="button" class="btn btn-light rounded-pill"><a class="backbtn"
+                            href="./">Back</a></button>
                 </div>
             </div>
         </div>
@@ -132,21 +154,22 @@ if (isset($_SESSION['student_id'])) {
                         <h5 class="modal-title">Forgot Password?</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                        <div class="modal-body">
-                            Select Role:
-                            <div class="text-center">
-                                <a class="backbtn" href="forgot_password_coor.php">Coordinator</a>
-                            </div>
-                            <br>
-                            <div class="text-center">
-                                <a class="backbtn" href="admin_forgot_password.php">Admin</a>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
+                    <div class="modal-body">
+                        Select Role:
                         <div class="text-center">
-                            <button type="button" class="btn btn-light rounded-pill"><a class="backbtn" href="login.php">Back</a></button>
+                            <a class="backbtn" href="forgot_password_coor.php">Coordinator</a>
                         </div>
+                        <br>
+                        <div class="text-center">
+                            <a class="backbtn" href="admin_forgot_password.php">Admin</a>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="text-center">
+                            <button type="button" class="btn btn-light rounded-pill"><a class="backbtn"
+                                    href="login.php">Back</a></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -246,8 +269,58 @@ if (isset($_SESSION['student_id'])) {
                 messageDiv.textContent = 'Login failed. Please try again.';
             }
         });
+
+        function togglePasswordVisibility(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.replace('bx-show', 'bx-hide');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.replace('bx-hide', 'bx-show');
+            }
+        }
+
+        function checkPasswordInput(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleButton = document.getElementById('togglePasswordButton');
+
+            if (passwordInput.value.length > 0) {
+                toggleButton.style.display = 'block'; // Show the button
+            } else {
+                toggleButton.style.display = 'none'; // Hide the button
+            }
+        }
+
+        function togglePinVisibility() {
+            const pinInput = document.getElementById('pin');
+            const toggleIcon = document.getElementById('togglePinIcon');
+
+            if (pinInput.type === 'password') {
+                pinInput.type = 'text';
+                toggleIcon.classList.replace('bx-show', 'bx-hide');
+            } else {
+                pinInput.type = 'password';
+                toggleIcon.classList.replace('bx-hide', 'bx-show');
+            }
+        }
+
+        function checkPinInput() {
+            const pinInput = document.getElementById('pin');
+            const toggleButton = document.getElementById('togglePinButton');
+
+            if (pinInput.value.length > 0) {
+                toggleButton.style.display = 'block'; // Show the button
+            } else {
+                toggleButton.style.display = 'none'; // Hide the button
+            }
+        }
+
+
     </script>
-    
+
 
 </body>
 

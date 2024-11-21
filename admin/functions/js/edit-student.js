@@ -26,6 +26,12 @@ $(document).ready(function () {
             option += '<option value="Active">Active</option>';
           }
           $("#edit_availability").html(option).val(mainAvailability);
+          $("#edit_first_name").val(data.firstname);
+          $("#edit_last_name").val(data.lastname);
+          $("#edit_email").val(data.email);
+          $("#edit_address").val(data.address);
+          $("#edit_phone").val(data.phone);
+          $("#edit_company_id").val(data.company_id);
         },
         error: function (xhr, status, error) {
           // Handle AJAX errors
@@ -46,14 +52,25 @@ $(document).ready(function () {
     $("#saveChangesBtn").click(function () {
       var studentId = studentIdToUpdate;
       var availability = $("#edit_availability").val();
-  
+      var firstname = $("#edit_first_name").val();
+      var lastname = $("#edit_last_name").val();
+      var email = $("#edit_email").val();
+      var address = $("#edit_address").val();
+      var phone = $("#edit_phone").val();
+      var company_id = $("#edit_company_id").val();
         // AJAX call to update student
         $.ajax({
           url: "functions/update-students.php",
           method: "POST",
           data: {
             student_id: studentId,
-            availability: availability
+            availability: availability,
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
+            address: address,
+            phone: phone,
+            company_id: company_id
           },
           dataType: "json",
           success: function (data) {

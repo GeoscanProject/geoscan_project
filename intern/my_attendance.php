@@ -243,7 +243,7 @@ include_once '../includes/getAddress.php';
 
   function openModal(photoSrc) {
     const modalImage = document.getElementById('modalImage');
-    modalImage.src = photoSrc; // Set the source of the image in the modal
+    modalImage.src = `../uploads/${photoSrc}`; // Ensure the correct path is set
     const exampleModal = new bootstrap.Modal(document.getElementById('exampleModal'));
     exampleModal.show(); // Show the modal using Bootstrap
   }
