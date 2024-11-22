@@ -229,7 +229,7 @@ include 'includes/top_include.php';
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editAvailabilityModalLabel">Edit Availability</h5>
+                    <h5 class="modal-title" id="editAvailabilityModalLabel">Edit Information</h5>
                     <i class="fa-solid fa-xmark" style="font-size:20px; cursor:pointer;" data-dismiss="modal"
                         aria-label="Close"></i>
                 </div>
@@ -238,7 +238,18 @@ include 'includes/top_include.php';
 
                     <!-- Edit form -->
                     <div id="editPackageForm">
-
+                        <div class="form-group">
+                            <label for="edit_first_name">First Name:</label>
+                            <input type="text" class="form-control" id="edit_first_name" name="edit_first_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_last_name">Last Name:</label>
+                            <input type="text" class="form-control" id="edit_last_name" name="edit_last_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_email">Email:</label>
+                            <input type="email" class="form-control" id="edit_email" name="edit_email">
+                        </div>
                         <!-- Dropdown for availability -->
                         <div class="form-group">
                             <label for="edit_availability">Availability:</label>

@@ -26,6 +26,9 @@ $(document).ready(function () {
             option += '<option value="Active">Active</option>';
           }
           $("#edit_availability").html(option).val(mainAvailability);
+          $("#edit_first_name").val(data.firstname);
+          $("#edit_last_name").val(data.lastname);
+          $("#edit_email").val(data.email);
         },
         error: function (xhr, status, error) {
           // Handle AJAX errors
@@ -46,6 +49,9 @@ $(document).ready(function () {
     $("#saveChangesBtn").click(function () {
       var coordinatorId = coordinatorIdToUpdate;
       var availability = $("#edit_availability").val();
+      var firstname = $("#edit_first_name").val();
+      var lastname = $("#edit_last_name").val();
+      var email = $("#edit_email").val();
   
         // AJAX call to update coordinator
         $.ajax({
@@ -53,7 +59,10 @@ $(document).ready(function () {
           method: "POST",
           data: {
             coordinator_id: coordinatorId,
-            availability: availability
+            availability: availability,
+            firstname: firstname,
+            lastname: lastname,
+            email: email
           },
           dataType: "json",
           success: function (data) {
