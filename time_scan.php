@@ -7,6 +7,21 @@
     <link rel="stylesheet" href="assets/css/scan.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <?php include 'includes/top_include.php' ?>
+    <style>
+        /* Optional Styling for Time In and Time Out Labels */
+        .time-action {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .time-in {
+            color: green;
+        }
+
+        .time-out {
+            color: red;
+        }
+    </style>
 </head>
 
 <body>
@@ -14,23 +29,20 @@
     <div class="wrapper">
         <div class="container">
             <div class="header h1-header">
-                <h1>Tap to scan</h1>
+                <h1>Tap to Scan</h1>
             </div>
 
-            <!-- Dropdown to select Time In or Time Out -->
+            <!-- Updated Label for Current Action -->
             <div class="select-time">
-                <label for="timeSelection">Select Type:</label>
-                <select id="timeSelection" class="time-dropdown">
-                    <option value="time_in">Time In</option>
-                    <option value="time_out">Time Out</option>
-                </select>
+                <!-- <label for="timeAction">Current Action:</label> -->
+                <span id="timeAction" class="time-action time-in">Time In</span>
             </div>
 
             <br><br><br>
             <div class="icon">
-                <button class="button-main-scan" id="loginButton"
-                    style="border-radius:100%; !important; height:200px; width:185px;"><i
-                        class="fa-solid fa-fingerprint fa-8x" style="color:#fff !important;"></i></button>
+                <button class="button-main-scan" id="loginButton" style="border-radius:100%; height:200px; width:185px;">
+                    <i class="fa-solid fa-fingerprint fa-8x" style="color:#fff;"></i>
+                </button>
             </div>
             <br><br>
             <div class="buttons">
@@ -38,8 +50,6 @@
             </div>
         </div>
     </div>
-
-
 
     <div id="preloader">
         <div class="loader"></div>
@@ -59,17 +69,8 @@
         }
 
         document.getElementById('loginButton').addEventListener('click', async () => {
-            const timeSelection = document.getElementById('timeSelection').value;
-
             // Show the preloader
             showPreloader();
-
-            // Map the timeSelection to formal messages
-            const timeSelectionMessages = {
-                'time_in': 'Time In',
-                'time_out': 'Time Out'
-            };
-            const formalMessage = timeSelectionMessages[timeSelection] || 'Unknown';
 
             if (!navigator.geolocation) {
                 Swal.fire({
@@ -142,8 +143,7 @@
                                 type: assertion.type
                             },
                             longitude,
-                            latitude,
-                            timeSelection // Include the time selection (in/out)
+                            latitude
                         })
                     });
 
@@ -151,9 +151,18 @@
                     if (result.success) {
                         Swal.fire({
                             title: 'Success',
-                            text: `Successfully recorded your ${formalMessage}.`,
+                            text: result.message,
                             icon: 'success'
                         });
+
+                        // Automatically update the displayed action
+                        const timeAction = document.getElementById('timeAction');
+                        const nextType = result.nextType || 'time_in'; // Fallback to 'time_in' if undefined
+                        timeAction.textContent = nextType === 'time_in' ? 'Time In' : 'Time Out';
+
+                        // Update classes for styling
+                        timeAction.classList.remove('time-in', 'time-out');
+                        timeAction.classList.add(nextType === 'time_in' ? 'time-in' : 'time-out');
                     } else {
                         Swal.fire({
                             title: 'Error',
@@ -161,6 +170,7 @@
                             icon: 'error'
                         });
                     }
+
                 } catch (error) {
                     console.error('Error:', error);
                     Swal.fire({
@@ -191,6 +201,13 @@
             window.location.href = './';
         });
 
+        function showPreloader() {
+            document.getElementById('preloader').style.display = 'block';
+        }
+
+        function hidePreloader() {
+            document.getElementById('preloader').style.display = 'none';
+        }
     </script>
 </body>
 

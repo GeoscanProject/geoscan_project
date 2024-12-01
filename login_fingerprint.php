@@ -5,26 +5,20 @@ $data = json_decode(file_get_contents('php://input'), true);
 $credential = $data['credential'] ?? null;
 $longitude = $data['longitude'] ?? null;
 $latitude = $data['latitude'] ?? null;
-$timeSelection = $data['timeSelection'] ?? null;
 
-if (!$credential || !$longitude || !$latitude || !$timeSelection) {
+if (!$credential || !$longitude || !$latitude) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Invalid input data.']);
     exit;
 }
 
 $credential_id = $credential['id'] ?? null;
-$authenticator_data = $credential['response']['authenticatorData'] ?? null;
-$client_data_json = $credential['response']['clientDataJSON'] ?? null;
-$signature = $credential['response']['signature'] ?? null;
 
-if (!$credential_id || !$authenticator_data || !$client_data_json || !$signature) {
+if (!$credential_id) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Incomplete assertion data.']);
     exit;
 }
-
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 try {
     $sql = "SELECT * FROM tbl_users WHERE credential_id = :credential_id";
@@ -33,77 +27,82 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
-        // Map the timeSelection to formal messages
-        $timeSelectionMessages = [
-            'time_in' => 'Time In',
-            'time_out' => 'Time Out'
-        ];
+        $student_id = $user['student_id'];
 
-        // Check if the user already has a time in record
-        if ($timeSelection === 'time_out') {
-            $check_time_in_sql = "SELECT * FROM tbl_timelogs WHERE student_id = :student_id AND DATE(timestamp) = CURDATE() AND type = 'time_in'";
-            $check_time_in_stmt = $pdo->prepare($check_time_in_sql);
-            $check_time_in_stmt->execute([':student_id' => $user['student_id']]);
-            $time_in_log = $check_time_in_stmt->fetch(PDO::FETCH_ASSOC);
+        // Check for existing "Time In" log for today
+        $check_time_in_sql = "SELECT * FROM tbl_timelogs 
+                              WHERE student_id = :student_id AND DATE(timestamp) = CURDATE() AND type = 'time_in'";
+        $check_time_in_stmt = $pdo->prepare($check_time_in_sql);
+        $check_time_in_stmt->execute([':student_id' => $student_id]);
+        $time_in_log = $check_time_in_stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$time_in_log) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'You must time in before you can time out.']);
-                exit;
-            }
+        // Check for existing "Time Out" log for today
+        $check_time_out_sql = "SELECT * FROM tbl_timelogs 
+                               WHERE student_id = :student_id AND DATE(timestamp) = CURDATE() AND type = 'time_out'";
+        $check_time_out_stmt = $pdo->prepare($check_time_out_sql);
+        $check_time_out_stmt->execute([':student_id' => $student_id]);
+        $time_out_log = $check_time_out_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($time_in_log && $time_out_log) {
+            // Both logs exist for today
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Both Time In and Time Out have already been recorded for today.'
+            ]);
+            exit;
         }
 
-        // Check if a log entry for the selected type already exists for today
-        $check_sql = "SELECT * FROM tbl_timelogs WHERE student_id = :student_id AND DATE(timestamp) = CURDATE() AND type = :type";
-        $check_stmt = $pdo->prepare($check_sql);
-        $check_stmt->execute([':student_id' => $user['student_id'], ':type' => $timeSelection]);
-        $existing_log = $check_stmt->fetch(PDO::FETCH_ASSOC);
+        // Determine the next action
+        $nextType = $time_in_log ? 'time_out' : 'time_in';
 
-        $formalMessage = $timeSelectionMessages[$timeSelection] ?? 'Unknown';
+        // Insert the log
+        $log_sql = "INSERT INTO tbl_timelogs (student_id, type, timestamp, longitude, latitude) 
+                    VALUES (:student_id, :type, NOW(), :longitude, :latitude)";
+        $log_stmt = $pdo->prepare($log_sql);
 
-        if ($existing_log) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => "You have already recorded your $formalMessage for today."]);
-        } else {
-            $pin = ''; // If needed
-            $photo = ''; // Set to an empty string or binary data if applicable
+        try {
+            $log_stmt->execute([
+                ':student_id' => $student_id,
+                ':type' => $nextType,
+                ':longitude' => $longitude,
+                ':latitude' => $latitude
+            ]);
 
-            $log_sql = "INSERT INTO tbl_timelogs (student_id, pin, type, timestamp, longitude, latitude, photo) 
-                 VALUES (:student_id, :pin, :type, NOW(), :longitude, :latitude, :photo)";
-            $log_stmt = $pdo->prepare($log_sql);
-
-            try {
-                $log_stmt->execute([
-                    ':student_id' => $user['student_id'],
-                    ':pin' => $pin,
-                    ':type' => $timeSelection,
-                    ':longitude' => $longitude,
-                    ':latitude' => $latitude,
-                    ':photo' => $photo
-                ]);
-
-                if ($log_stmt->rowCount() > 0) {
-                    error_log("Log inserted successfully");
-                    header('Content-Type: application/json');
-                    echo json_encode(['success' => true, 'message' => 'Log recorded successfully.']);
-                } else {
-                    error_log("Log insert failed");
-                    header('Content-Type: application/json');
-                    echo json_encode(['success' => false, 'message' => 'Failed to insert log.']);
-                }
-            } catch (Exception $e) {
-                error_log("Insertion error: " . $e->getMessage());
+            if ($log_stmt->rowCount() > 0) {
+                // Format the message explicitly
+                $actionMessage = ($nextType === 'time_in') ? 'Time In Recorded Successfully' : 'Time Out Recorded Successfully';
+            
                 header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+                echo json_encode([
+                    'success' => true,
+                    'message' => $actionMessage,
+                    'nextType' => $nextType
+                ]);
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to record log.'
+                ]);
             }
+            
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error inserting log: ' . $e->getMessage()
+            ]);
         }
     } else {
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'Authentication failed.']);
+        echo json_encode(['success' => false, 'message' => 'User not found.']);
     }
 } catch (Exception $e) {
-    error_log("Database error: " . $e->getMessage());
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error retrieving user: ' . $e->getMessage()
+    ]);
 }
 ?>
