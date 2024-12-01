@@ -19,11 +19,47 @@
     <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
     <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
     <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Template Main CSS File -->
     <link href="assets/css/index.css" rel="stylesheet">
 
+    <style>
+        /* Animation Keyframes */
+        @keyframes bounce {
 
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Apply Animation */
+        .bouncing-icon {
+            display: inline-block;
+            font-size: 24px;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+            /* Animation lasts 2 seconds and repeats infinitely */
+        }
+
+        /* Optional: Add hover effect to emphasize interactivity */
+        .bouncing-icon:hover {
+            color: #007bff;
+            /* Change color on hover */
+        }
+    </style>
 
     <section id="register" class="services">
         <div class="container">
@@ -38,7 +74,11 @@
             </div>
             <br><br><br><br>
             <header class="section-header">
-                <h2>Time Record</h2>
+                <h2>Time Record |
+                    <i class="ri-questionnaire-fill bouncing-icon" data-bs-toggle="modal"
+                        data-bs-target="#InfoModal"></i>
+                </h2>
+
                 <p>Time in/out using:</p>
             </header>
 
@@ -67,6 +107,57 @@
             </div>
         </div>
     </section>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="InfoModal" tabindex="-1" role="dialog" aria-labelledby="InfoModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="InfoModalLabel" style="color:#198754; font-weight: bold;">
+                        Information for Accurate Time Logs
+                    </h5>
+                    <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer;" data-bs-dismiss="modal"
+                        aria-label="Close"></i>
+                </div>
+                <div class="modal-body">
+                    <h6 style="font-weight: bold;">Configuration for more GPS Accuracy:</h6>
+                    <p><strong>1. Use High-Accuracy GPS Mode (Mobile Settings)</strong></p>
+                    <p>
+                        <strong>On Android:</strong><br>
+                        Go to <em>Settings > Location > Mode</em> or <em>Location Accuracy</em>. Select <strong>High
+                            accuracy</strong>.
+                        This mode uses GPS, Wi-Fi, Bluetooth, and mobile networks to determine your location.
+                    </p>
+                    <p>
+                        <strong>On iOS:</strong><br>
+                        Go to <em>Settings > Privacy > Location Services</em>. Ensure that Location Services is enabled
+                        and set apps that require high accuracy (e.g., Maps or tracking apps) to <em>While Using the
+                            App</em>.
+                    </p>
+                    <p>
+                        This method allows the device to combine multiple sources of data, improving location precision.
+                    </p>
+                    <p><strong>2. Enable Wi-Fi and Bluetooth</strong></p>
+                    <p>
+                        Even when not connected to a Wi-Fi network, enabling Wi-Fi and Bluetooth on the device can
+                        assist in
+                        determining location more accurately. This is particularly useful in urban environments where
+                        GPS signals
+                        may be weak or obstructed.
+                    </p>
+                    <ul>
+                        <li>Wi-Fi can help triangulate your position by detecting nearby networks.</li>
+                        <li>Bluetooth beacons can also provide location data for fine-tuning your position.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="preloader">
         <div class="loader"></div>
     </div>
@@ -79,6 +170,7 @@
     <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
     <script src="assets/vendor/php-email-form/validate.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     </body>
 

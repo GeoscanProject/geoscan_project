@@ -4,6 +4,7 @@ include "functions/fetch-forgot-timeout.php";
 $currentDate = date('Y-m-d');
 ?>
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link href="../assets/css/table.css" rel="stylesheet">
 <!-- ======= Sidebar ======= -->
 
@@ -375,14 +376,116 @@ $currentDate = date('Y-m-d');
             </div>
           </div>
 
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card new-registrations-card">
+              <div class="card-body">
+                <h5 class="card-title">Requesting for Missed Log</h5>
+                <?php
+                // Prepare the SQL query with a parameter for the coordinator_id
+                $query = "SELECT A.*, B.coordinator_id 
+                FROM tbl_request AS A 
+                LEFT JOIN tbl_users AS B ON A.student_id = B.student_id
+                WHERE A.status = 'Pending' AND B.coordinator_id = :coordinator_id";
+
+                // Prepare the statement
+                $stmt = $pdo->prepare($query);
+
+                // Bind the parameter
+                $stmt->bindValue(':coordinator_id', $_SESSION['coordinator_id'], PDO::PARAM_INT);
+
+                // Execute the query
+                $stmt->execute();
+
+                // Fetch all results
+                $requests = $stmt->fetchAll();
+
+                // Check if there are any rows returned
+                if ($requests):
+                  ?>
+                  <ul>
+                    <?php foreach ($requests as $request): ?>
+                      <li>
+                        <strong>Student ID:</strong> <?= htmlspecialchars($request['student_id']); ?><br>
+                        <strong>Reason:</strong> <?= htmlspecialchars($request['reason']); ?><br>
+                        <strong>Files:</strong>
+                        <a href="#" class="view-file"
+                          data-file='<?php echo htmlspecialchars(json_encode(explode(',', $request['files']))); ?>'>View
+                          Files</a><br>
+
+                        <strong>Status:</strong>
+                        <span class='badge badge-warning' style='color:black;background-color:orange;'>
+                          <?= htmlspecialchars($request['status']); ?></span><br>
+                        <strong>Date for adjustment:</strong> <?= htmlspecialchars($request['records']); ?><br><br>
+
+                        <!-- Approve Button -->
+                        <button class="btn btn-success approve-btn"
+                          data-request-id="<?= htmlspecialchars($request['id']); ?>"
+                          data-student-id="<?= htmlspecialchars($request['student_id']); ?>">
+                          Approve
+                        </button>
+
+                      </li>
+                    <?php endforeach; ?>
+                  </ul>
+                <?php else: ?>
+                  <p>No requests found.</p>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal for Approving Requests and Inputting Time -->
+          <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="approveModalLabel">Approve Request</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <!-- Date Time Picker for Time In and Time Out -->
+                  <div class="mb-3">
+                    <label for="time_in" class="form-label">Time In</label>
+                    <input type="datetime-local" class="form-control" id="time_in">
+                  </div>
+                  <div class="mb-3">
+                    <label for="time_out" class="form-label">Time Out</label>
+                    <input type="datetime-local" class="form-control" id="time_out">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" id="submitApproval">Approve</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+            <div class="modal-dialog"> <!-- Use the 'modal-sm' class for smaller modal -->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="fileModalLabel">View File</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex justify-content-center align-items-center" style="min-height: 200px;">
+                  <!-- This will hold the file content, centered -->
+                  <img id="fileViewer" class="img-fluid" alt="File Content"> <!-- Use img tag instead of iframe -->
+                </div>
+                <div class="modal-footer">
+                  <!-- Next and Previous Buttons -->
+                  <button type="button" id="prevFileBtn" class="btn btn-secondary">Previous</button>
+                  <button type="button" id="nextFileBtn" class="btn btn-primary">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
 
 
 
 
         </div>
-      </div>
-
-    </div>
   </section>
 
 </main><!-- End #main -->
@@ -390,5 +493,148 @@ $currentDate = date('Y-m-d');
 <script src="../assets/js/datatables-simple-demo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
   crossorigin="anonymous"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const fileLinks = document.querySelectorAll('.view-file');
+
+    fileLinks.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Get the file paths from the data-file attribute
+        const filePaths = JSON.parse(this.getAttribute('data-file'));
+
+        // Get the image element (not iframe now)
+        const imgViewer = document.getElementById('fileViewer');
+
+        // Set the first image's src
+        imgViewer.src = 'geoscan_project/' + filePaths[0];
+
+        // Open the modal (Bootstrap 5)
+        const fileModal = new bootstrap.Modal(document.getElementById('fileModal'));
+        fileModal.show();
+
+        // Optional: Handle file navigation within the modal (next/previous buttons)
+        let currentIndex = 0;
+
+        // Ensure the buttons exist before adding event listeners
+        const nextFileBtn = document.getElementById('nextFileBtn');
+        const prevFileBtn = document.getElementById('prevFileBtn');
+
+        if (nextFileBtn && prevFileBtn) {
+          nextFileBtn.addEventListener('click', function () {
+            currentIndex = (currentIndex + 1) % filePaths.length; // Loop back to the first file if at the end
+            imgViewer.src = 'geoscan_project/' + filePaths[currentIndex];
+          });
+
+          prevFileBtn.addEventListener('click', function () {
+            currentIndex = (currentIndex - 1 + filePaths.length) % filePaths.length; // Loop to the last file if at the beginning
+            imgViewer.src = 'geoscan_project/' + filePaths[currentIndex];
+          });
+        }
+      });
+    });
+
+    // Open modal and set up approve button functionality
+    document.querySelectorAll('.approve-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        // Get the request ID and student ID from the button's data attributes
+        const requestId = this.getAttribute('data-request-id');
+        const studentId = this.getAttribute('data-student-id');
+
+        // Show the modal
+        const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
+        approveModal.show();
+
+        // Handle form submission (Approve button inside modal)
+        document.getElementById('submitApproval').addEventListener('click', function () {
+          // Get the values for time_in and time_out
+          const timeIn = document.getElementById('time_in').value;
+          const timeOut = document.getElementById('time_out').value;
+
+          if (timeIn && timeOut) {
+            // Make an AJAX request to insert the data into tbl_timelogs
+            fetch('functions/approve-request.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                request_id: requestId,
+                student_id: studentId,
+                time_in: timeIn,
+                time_out: timeOut,
+              }),
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Show success SweetAlert
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Request Approved!',
+                    text: 'Time logs inserted successfully.',
+                    confirmButtonText: 'OK'
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      // Close the modal
+                      approveModal.hide();
+
+                      // Optionally, update the UI to reflect the new status
+                      button.disabled = true;
+                      button.textContent = 'Approved';
+
+                      window.location.reload();
+                    }
+                  });
+                } else {
+                  // Show error SweetAlert when logs already exist
+                  if (data.message.includes('Logs already exist.')) {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Log Conflict',
+                      text: 'You cannot enter time logs for this date as logs already exist.',
+                      confirmButtonText: 'OK'
+                    });
+                  } else {
+                    // Generic error SweetAlert
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Oops...',
+                      text: 'Failed to approve the request.',
+                      confirmButtonText: 'OK'
+                    });
+                  }
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                // Show error SweetAlert
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Something went wrong',
+                  text: 'Please try again later.',
+                  confirmButtonText: 'OK'
+                });
+              });
+          } else {
+            // Show SweetAlert for missing time_in or time_out
+            Swal.fire({
+              icon: 'warning',
+              title: 'Incomplete data',
+              text: 'Please enter both Time In and Time Out.',
+              confirmButtonText: 'OK'
+            });
+          }
+        });
+      });
+    });
+
+
+  });
+</script>
+
+
 
 <?php include "footer.php"; ?>
