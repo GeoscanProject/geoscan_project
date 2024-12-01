@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $firstname = isset($_POST['firstname']) ? $_POST['firstname'] : null;
     $lastname = isset($_POST['lastname']) ? $_POST['lastname'] : null;
     $email = isset($_POST['email']) ? $_POST['email'] : null;
+    $contact = isset($_POST['contact']) ? $_POST['contact'] : null;
 
     // Fetch name 
     $sql_fetch = "SELECT firstname, lastname FROM tbl_coordinators WHERE coordinator_id = :coordinator_id";
@@ -45,6 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo json_encode(['msg' => $msg]);
         exit();
     }
+    if (empty(trim($contact))) {
+        $msg = 'Please enter Contact Number.';
+        // Return the error message
+        echo json_encode(['msg' => $msg]);
+        exit();
+    }
     if (empty(trim($email))) {
         $msg = 'Please enter a Email.';
         // Return the error message
@@ -63,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // $lastname = $coordinator['lastname'];
 
     // Prepare SQL statement to update coordinator
-    $sql = 'UPDATE tbl_coordinators SET  status = :availability,  firstname = :firstname, lastname = :lastname, email = :email WHERE coordinator_id = :coordinator_id';
+    $sql = 'UPDATE tbl_coordinators SET  status = :availability,  firstname = :firstname, lastname = :lastname, email = :email, contact = :contact WHERE coordinator_id = :coordinator_id';
     $stmt = $pdo->prepare($sql);
 
     // Bind parameters
@@ -72,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':firstname', $firstname, PDO::PARAM_STR);
     $stmt->bindParam(':lastname', $lastname, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':contact', $contact, PDO::PARAM_STR);
 
     try {
 

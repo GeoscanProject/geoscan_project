@@ -29,6 +29,7 @@ $(document).ready(function () {
           $("#edit_first_name").val(data.firstname);
           $("#edit_last_name").val(data.lastname);
           $("#edit_email").val(data.email);
+          $("#edit_contact").val(data.contact);
         },
         error: function (xhr, status, error) {
           // Handle AJAX errors
@@ -52,6 +53,7 @@ $(document).ready(function () {
       var firstname = $("#edit_first_name").val();
       var lastname = $("#edit_last_name").val();
       var email = $("#edit_email").val();
+      var contact = $("#edit_contact").val();
   
         // AJAX call to update coordinator
         $.ajax({
@@ -62,7 +64,9 @@ $(document).ready(function () {
             availability: availability,
             firstname: firstname,
             lastname: lastname,
-            email: email
+            email: email,
+            contact: contact
+
           },
           dataType: "json",
           success: function (data) {

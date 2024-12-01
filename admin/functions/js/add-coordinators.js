@@ -5,12 +5,13 @@ $(document).ready(function () {
       var firstname = $("#firstname").val();
       var lastname = $("#lastname").val();
       var email = $("#email").val();
+      var contact = $("#contact").val();
       var password = $("#password").val();
   
       var coordinator_id = coordinator_id;
   
       // Make sure all fields are filled
-      if (username != "" && firstname != "" && lastname != "" && email != "" && password != "" && department_id != "") {
+      if (username != "" && firstname != "" && lastname != "" && email != "" && contact != "" && password != "" && department_id != "") {
         $.ajax({
           url: "functions/add-coordinators.php",
           method: "POST",
@@ -20,6 +21,7 @@ $(document).ready(function () {
             firstname: firstname,
             lastname: lastname,
             email: email,
+            contact: contact,
             coordinator_id: coordinator_id,
             password: password
           },

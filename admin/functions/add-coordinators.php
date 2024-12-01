@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
     $email = $_POST['email'];
+    $contact = $_POST['contact'];
     $password = $_POST['password'];
 
     // Validate catering name
@@ -29,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    if (empty(trim($contact))) {
+        $msg = 'Please enter Contact Number.';
+        echo json_encode(['msg' => $msg]);
+        exit();
+    }
+    
     if (empty(trim($department_id))) {
         $msg = 'Please select Department.';
         echo json_encode(['msg' => $msg]);
@@ -69,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $status = "Active";
 
-    $sql = 'INSERT INTO tbl_coordinators (coordinator_id, username, firstname, lastname, email, status, department_id, password) VALUES (:coordinator_id, :username, :firstname, :lastname, :email, :status, :department_id, :password)';
+    $sql = 'INSERT INTO tbl_coordinators (coordinator_id, username, firstname, lastname, email, contact, status, department_id, password) VALUES (:coordinator_id, :username, :firstname, :lastname, :email, :contact, :status, :department_id, :password)';
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':coordinator_id', $coordinator_id, PDO::PARAM_STR);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
@@ -77,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':lastname', $lastname, PDO::PARAM_STR);
     $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':contact', $contact, PDO::PARAM_STR);
     $stmt->bindParam(':status', $status, PDO::PARAM_STR);
     $stmt->bindParam(':department_id', $department_id, PDO::PARAM_STR);
 

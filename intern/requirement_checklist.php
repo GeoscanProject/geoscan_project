@@ -11,6 +11,28 @@ function formatTimestamp($timestamp)
   $dateTime = new DateTime($timestamp);
   return $dateTime->format('F j, Y g:i a');
 }
+
+$student_id = $_SESSION['student_id'];
+$stmt = $pdo->prepare("SELECT * FROM tbl_requirements WHERE student_id = :student_id");
+$stmt->bindParam(':student_id', $student_id);
+$stmt->execute();
+$files = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Define form types and descriptions
+$formTypes = [
+  "PNC:AA-FO-20" => "PNC:AA-FO-20 Annual Report in the Implementation of Student Internship Program in the Philippines (SIPP)",
+  "PNC:AA-FO-21" => "PNC:AA-FO-21 Report on the List of Host Training Establishments (HTES) and Student Interns Participants Student Internship Program in the Philippines",
+  "PNC:AA-FO-22" => "PNC:AA-FO-22 Internship Host Training Establishment Evaluation Form",
+  "PNC:AA-FO-23" => "PNC:AA-FO-23 Internship Program Evaluation Form",
+  "PNC:AA-FO-24" => "PNC:AA-FO-24 Student Intern Performance Evaluation Form",
+  "PNC:AA-FO-25" => "PNC:AA-FO-25 Student Internship Training Plan Form",
+  "PNC:AA-FO-26" => "PNC:AA-FO-26 Request for HTE Recommendation Letter",
+  "PNC:AA-FO-27" => "PNC:AA-FO-27 Student Curriculum Vitae",
+  "PNC:AA-FO-28" => "PNC:AA-FO-28 Student Internship Consent Form",
+  "PNC:AA-FO-29" => "PNC:AA-FO-29 Student Internship Acceptance Form",
+  "PNC:AA-FO-30" => "PNC:AA-FO-30 Student Internship Daily Time Record (DTR) Form",
+  "PNC:AA-FO-31" => "PNC:AA-FO-31 Weekly Daily Journal"
+];
 ?>
 
 <style>
@@ -34,6 +56,10 @@ function formatTimestamp($timestamp)
 
   .form-check-input {
     margin-right: 1rem;
+  }
+  .upload-form {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
   }
 </style>
 
@@ -113,78 +139,7 @@ function formatTimestamp($timestamp)
     </nav>
   </div><!-- End Page Title -->
 
-  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-    <button class="btn btn-success me-md-2" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
-      <i class="bi bi-folder-symlink" style="color: #fff;"></i>&nbsp;Upload Forms
-    </button>
-  </div><br>
-
-  <!-- Upload Forms Modal -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Upload Forms</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <!-- File Upload Form -->
-          <form action="upload_file.php" method="post" enctype="multipart/form-data">
-            <!-- Hidden Fields -->
-            <input type="text" class="form-control" value="<?php echo htmlspecialchars($_SESSION['student_id']); ?>"
-              name="student_id" required hidden>
-            <input type="text" class="form-control" value="Pending" name="status" required hidden>
-
-            <!-- Dropdown for Forms -->
-            <div class="col-md-12">
-              <label for="validationCustom04" class="form-label">List of Forms</label>
-              <select class="form-select" id="validationCustom04" name="form_type" required>
-                <option selected disabled value="">Choose...</option>
-                <option value="PNC:AA-FO-20">PNC:AA-FO-20 Annual Report in the Implementation of Student Internship
-                  Program in the Philippines (SIPP)</option>
-                <option value="PNC:AA-FO-21">PNC:AA-FO-21 Report on the List of Host Training Establishments (HTES) and
-                  Student Interns Participants Student Internship Program in the Philippines</option>
-                <option value="PNC:AA-FO-22">PNC:AA-FO-22 Internship Host Training Establishment Evaluation Form
-                </option>
-                <option value="PNC:AA-FO-23">PNC:AA-FO-23 Internship Program Evaluation Form</option>
-                <option value="PNC:AA-FO-24">PNC:AA-FO-24 Student Intern Performance Evaluation Form</option>
-                <option value="PNC:AA-FO-25">PNC:AA-FO-25 Student Internship Training Plan Form</option>
-                <option value="PNC:AA-FO-26">PNC:AA-FO-26 Request for HTE Recommendation Letter</option>
-                <option value="PNC:AA-FO-27">PNC:AA-FO-27 Student Curriculum Vitae</option>
-                <option value="PNC:AA-FO-28">PNC:AA-FO-28 Student Internship Consent Form</option>
-                <option value="PNC:AA-FO-29">PNC:AA-FO-29 Student Internship Acceptance Form</option>
-                <option value="PNC:AA-FO-30">PNC:AA-FO-30 Student Internship Daily Time Record (DTR) Form</option>
-                <option value="PNC:AA-FO-31">PNC:AA-FO-31 Weekly Daily Journal</option>
-              </select>
-              <div class="invalid-feedback">
-                Please select a valid form.
-              </div>
-            </div><br>
-
-            <!-- File Input -->
-            <div class="mb-3">
-              <label for="file" class="form-label">Attach File</label>
-              <input class="form-control" type="file" id="file" name="file" required>
-            </div>
-            <button type="submit" class="btn-main">Upload</button>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <?php
-  $student_id = $_SESSION['student_id'];
-  // Fetch the files related to the logged-in student
-  $stmt = $pdo->prepare("SELECT * FROM tbl_requirements WHERE student_id = :student_id");
-  $stmt->bindParam(':student_id', $student_id);
-  $stmt->execute();
-  $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
-  ?>
-
+  <!-- Display Files Section with Upload Form Integrated -->
   <div class="col-xl-12">
     <div class="card">
       <div class="card-body">
@@ -195,8 +150,6 @@ function formatTimestamp($timestamp)
             <i class="ri-folders-line" style="color: #000;"></i> List of Forms need to comply
           </button>
         </h5>
-
-        <br>
 
         <?php
         $student_id = $_SESSION['student_id'];
@@ -250,92 +203,115 @@ function formatTimestamp($timestamp)
           </div>
         </div>
 
-        <?php if (count($files) > 0): ?>
-          <?php foreach ($files as $file): ?>
+        <br>
+
+        <?php foreach ($formTypes as $formCode => $formDescription): ?>
+          <!-- Check if the student has uploaded this form -->
+          <?php
+          $fileUploaded = false;
+          foreach ($files as $file) {
+            if ($file['form_type'] === $formCode) {
+              $fileUploaded = true;
+              break;
+            }
+          }
+          ?>
+
+          <!-- If file uploaded, show the file details, else show the upload form -->
+          <?php if ($fileUploaded): ?>
+            <!-- Display file details -->
+            <?php foreach ($files as $file): ?>
+              <?php if ($file['form_type'] === $formCode): ?>
+                <div class="mb-4">
+                  <div class="file-card p-3 mb-3 border rounded d-flex flex-column flex-md-row justify-content-between align-items-start">
+                    <div class="file-info">
+                      <strong><?php echo htmlspecialchars($file['form_type']); ?></strong><br>
+                      <small>File Name: <?php echo htmlspecialchars($file['file_name']); ?></small><br>
+                      <small>Status:
+                        <?php
+                        if ($file['status'] == "Pending") {
+                          echo "<span class='badge rounded-pill bg-warning text-dark'>" . htmlspecialchars($file['status']) . "</span>";
+                        } elseif ($file['status'] == "Approved") {
+                          echo "<span class='badge rounded-pill bg-success text-white'>" . htmlspecialchars($file['status']) . "</span>";
+                        } elseif ($file['status'] == "Cancelled") {
+                          echo "<span class='badge rounded-pill bg-danger text-white'>" . htmlspecialchars($file['status']) . "</span>";
+                        } else {
+                          echo "<span class='badge rounded-pill bg-secondary text-white'>" . htmlspecialchars($file['status']) . "</span>";
+                        }
+                        ?>
+                      </small><br>
+                      <small>Uploaded At: <?php echo formatTimestamp($file['uploaded_at']); ?></small>
+                    </div>
+
+                    <div class="mt-3 mt-md-0">
+                      <?php if ($file['status'] === 'Pending' || $file['status'] === 'Cancelled'): ?>
+                        <button type="button" class="btn btn-danger btn-sm me-2 delete-btn" data-file-id="<?php echo $file['id']; ?>">
+                          <i class="ri-delete-bin-5-line" style="color: #fff;"></i> Delete
+                        </button>
+                      <?php endif; ?>
+                      <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#fileModal<?php echo $file['id']; ?>">
+                        <i class="ri-folder-open-line" style="color: #fff;"></i> View File
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- File Modal -->
+                <div class="modal fade" id="fileModal<?php echo $file['id']; ?>" tabindex="-1" aria-labelledby="fileModalLabel<?php echo $file['id']; ?>" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="fileModalLabel<?php echo $file['id']; ?>">
+                          <?php echo htmlspecialchars($file['file_name']); ?>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <?php
+                        $filePath = htmlspecialchars($file['file_path']);
+                        $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+                        if (in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                          echo "<img src='" . $filePath . "' class='img-fluid' alt='" . htmlspecialchars($file['file_name']) . "'>";
+                        } elseif (in_array($fileExtension, ['pdf'])) {
+                          echo "<iframe src='" . $filePath . "' width='100%' height='500px'></iframe>";
+                        } else {
+                          echo "<p>Cannot preview this file type.</p>";
+                        }
+                        ?>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <?php endif; ?>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <!-- If file not uploaded, show the upload form -->
             <div class="mb-4">
-              <div
-                class="file-card p-3 mb-3 border rounded d-flex flex-column flex-md-row justify-content-between align-items-start">
-                <div class="file-info">
-                  <input class="form-check-input me-2" type="checkbox" id="form<?php echo $file['id']; ?>" <?php echo $file['status'] === 'Approved' ? 'checked' : ''; ?> disabled>
-                  <strong><?php echo htmlspecialchars($file['form_type']); ?></strong><br>
-                  <small>File Name: <?php echo htmlspecialchars($file['file_name']); ?></small><br>
-                  <small>Status:
-                    <?php
-                    if ($file['status'] == "Pending") {
-                      echo "<span class='badge rounded-pill bg-warning text-dark'>" . htmlspecialchars($file['status']) . "</span>";
-                    } elseif ($file['status'] == "Approved") {
-                      echo "<span class='badge rounded-pill bg-success text-white'>" . htmlspecialchars($file['status']) . "</span>";
-                    } elseif ($file['status'] == "Cancelled") {
-                      echo "<span class='badge rounded-pill bg-danger text-white'>" . htmlspecialchars($file['status']) . "</span>";
-                    } else {
-                      echo "<span class='badge rounded-pill bg-secondary text-white'>" . htmlspecialchars($file['status']) . "</span>";
-                    }
-                    ?>
-                  </small><br>
-                  <?php
-                  $file['cancel_reason'] = '';
-                  ?>
-                  <small>Remarks: <?php echo htmlspecialchars($file['cancel_reason']); ?></small><br>
-                  <small>Uploaded At: <?php echo formatTimestamp($file['uploaded_at']); ?></small>
-                </div>
+                  <div class="file-card p-3 mb-3 border rounded d-flex flex-column flex-md-row justify-content-between align-items-start">
+                    <div class="file-info">
+              <form action="upload_file.php" method="post" enctype="multipart/form-data">
+                <!-- Hidden Fields -->
+                <input type="text" class="form-control" value="<?php echo htmlspecialchars($_SESSION['student_id']); ?>" name="student_id" required hidden>
+                <input type="text" class="form-control" value="Pending" name="status" required hidden>
+                <input type="text" class="form-control" value="<?php echo htmlspecialchars($formCode); ?>" name="form_type" required hidden>
 
-                <div class="mt-3 mt-md-0">
-                  <?php if ($file['status'] === 'Pending' || $file['status'] === 'Cancelled'): ?>
-                    <button type="button" class="btn btn-danger btn-sm me-2 delete-btn"
-                      data-file-id="<?php echo $file['id']; ?>">
-                      <i class="ri-delete-bin-5-line" style="color: #fff;"></i> Delete
-                    </button>
-                  <?php endif; ?>
-                  <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                    data-bs-target="#fileModal<?php echo $file['id']; ?>">
-                    <i class="ri-folder-open-line" style="color: #fff;"></i> View File
-                  </button>
+                <!-- File Input -->
+                <div class="mb-3">
+                  <label for="file_<?php echo $formCode; ?>" class="form-label "><?php echo $formDescription; ?>
+                  <span class='badge rounded-pill bg-secondary text-white'>Missing</span>
+                </label>
+                  <input class="form-control" type="file" id="file_<?php echo $formCode; ?>" name="file" required>
                 </div>
-              </div>
-
+                <button type="submit" class="btn btn-primary"> <i class="bi bi-upload" style="color: #fff;"></i> Upload</button>
+              </form>
             </div>
-
-            <!-- File Modal -->
-            <div class="modal fade" id="fileModal<?php echo $file['id']; ?>" tabindex="-1"
-              aria-labelledby="fileModalLabel<?php echo $file['id']; ?>" aria-hidden="true">
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="fileModalLabel<?php echo $file['id']; ?>">
-                      <?php echo htmlspecialchars($file['file_name']); ?>
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
-                  <div class="modal-body">
-                    <?php
-                    $filePath = htmlspecialchars($file['file_path']);
-                    $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-
-                    if (in_array($fileExtension, ['pdf'])): ?>
-                      <embed src="<?php echo $filePath; ?>" type="application/pdf" width="100%" height="500px" />
-                    <?php elseif (in_array($fileExtension, ['png', 'jpg', 'jpeg'])): ?>
-                      <img src="<?php echo $filePath; ?>" class="img-fluid" alt="File Preview">
-                    <?php elseif (in_array($fileExtension, ['mp4', 'avi', 'mov'])): ?>
-                      <video controls style="width: 100%; height: auto;">
-                        <source src="<?php echo $filePath; ?>" type="video/<?php echo $fileExtension; ?>">
-                        Your browser does not support the video tag.
-                      </video>
-                    <?php elseif (in_array($fileExtension, ['doc', 'docx'])): ?>
-                      <p>Microsoft Word Document: <a href="<?php echo $filePath; ?>" target="_blank">Download Document</a></p>
-                    <?php else: ?>
-                      <p>Unsupported file type.</p>
-                    <?php endif; ?>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                  </div>
-                </div>
-              </div>
             </div>
-          <?php endforeach; ?>
-        <?php else: ?>
-          <p>No files have been submitted yet.</p>
-        <?php endif; ?>
+          <?php endif; ?>
+        <?php endforeach; ?>
       </div>
     </div>
   </div>
@@ -416,4 +392,4 @@ function formatTimestamp($timestamp)
   });
 </script>
 
-<?php include "footer.php"; ?>
+<?php include "footer.php"; ?>  

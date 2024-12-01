@@ -79,6 +79,7 @@ include 'includes/top_include.php';
                                         <th>First Name</th>
                                         <th>Last Name</th>
                                         <th>Email</th>
+                                        <th>Contact No.</th>
                                         <th>Status</th>
                                         <th>Member Since</th>
                                         <th>Action</th>
@@ -104,6 +105,9 @@ include 'includes/top_include.php';
                                             </td>
                                             <td>
                                                 <?php echo $coordinator['email']; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo $coordinator['contact']; ?>
                                             </td>
                                             <td>
                                                 <center>
@@ -184,6 +188,10 @@ include 'includes/top_include.php';
                         <input type="text" class="form-control" id="lastname" name="lastname">
                     </div>
                     <div class="form-group">
+                        <label for="contact">Contact Number:</label>
+                        <input type="number" class="form-control" id="contact" name="contact" required pattern="\d+" title="Only numeric values are allowed.">
+                    </div>
+                    <div class="form-group">
                         <label for="email">Email:</label>
                         <input type="text" class="form-control" id="email" name="email">
                     </div>
@@ -249,6 +257,10 @@ include 'includes/top_include.php';
                         <div class="form-group">
                             <label for="edit_email">Email:</label>
                             <input type="email" class="form-control" id="edit_email" name="edit_email">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_contact">Contact Number:</label>
+                            <input type="number" class="form-control" id="edit_contact" name="edit_contact" required pattern="\d+" title="Only numeric values are allowed.">
                         </div>
                         <!-- Dropdown for availability -->
                         <div class="form-group">
