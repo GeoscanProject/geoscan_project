@@ -301,7 +301,7 @@ $formTypes = [
                 <!-- File Input -->
                 <div class="mb-3">
                   <label for="file_<?php echo $formCode; ?>" class="form-label "><?php echo $formDescription; ?>
-                  <span class='badge rounded-pill bg-secondary text-white'>Missing</span>
+                  <span class='badge rounded-pill bg-danger text-white'>Missing</span>
                 </label>
                   <input class="form-control" type="file" id="file_<?php echo $formCode; ?>" name="file" required>
                 </div>

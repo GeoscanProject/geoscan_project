@@ -190,7 +190,7 @@ function formatTimestamp($timestamp) {
                                                     echo "<span class='badge rounded-pill bg-danger text-white'><i class='bi bi-exclamation-square'></i> &nbsp;" . htmlspecialchars($status) . "</span>";
                                                 }
                                             } else {
-                                                echo "<span class='badge rounded-pill bg-secondary text-white'><i class='bi bi-question-square'></i> &nbsp;Missing</span>";
+                                                echo "<span class='badge rounded-pill bg-danger text-white'><i class='bi bi-question-square'></i> &nbsp;Missing</span>";
                                             }
                                             ?>
                                         </td>

@@ -24,42 +24,6 @@
     <!-- Template Main CSS File -->
     <link href="assets/css/index.css" rel="stylesheet">
 
-    <style>
-        /* Animation Keyframes */
-        @keyframes bounce {
-
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-10px);
-            }
-
-            60% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* Apply Animation */
-        .bouncing-icon {
-            display: inline-block;
-            font-size: 24px;
-            cursor: pointer;
-            animation: bounce 2s infinite;
-            /* Animation lasts 2 seconds and repeats infinitely */
-        }
-
-        /* Optional: Add hover effect to emphasize interactivity */
-        .bouncing-icon:hover {
-            color: #007bff;
-            /* Change color on hover */
-        }
-    </style>
 
     <section id="register" class="services">
         <div class="container">
@@ -74,9 +38,7 @@
             </div>
             <br><br><br><br>
             <header class="section-header">
-                <h2>Time Record |
-                    <i class="ri-questionnaire-fill bouncing-icon" data-bs-toggle="modal"
-                        data-bs-target="#InfoModal"></i>
+                <h2>Time Record
                 </h2>
 
                 <p>Time in/out using:</p>
@@ -171,7 +133,13 @@
     <script src="assets/vendor/php-email-form/validate.js"></script>
     <script src="assets/js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Show the modal automatically when the page loads
+            var infoModal = new bootstrap.Modal(document.getElementById('InfoModal'));
+            infoModal.show();
+        });
+    </script>
     </body>
 
 </html>
