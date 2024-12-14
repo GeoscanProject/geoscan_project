@@ -1,7 +1,20 @@
 <?php
 include "nav.php";
 
-$interns = $pdo->query("SELECT student_id, firstname, lastname FROM tbl_users")->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->prepare("
+    SELECT A.student_id, A.firstname, A.lastname
+    FROM tbl_users AS A
+    LEFT JOIN tbl_coordinators AS B ON A.coordinator_id = B.coordinator_id
+    WHERE B.coordinator_id = :coordinator_id
+");
+
+// Bind the parameter and execute the statement
+$stmt->bindParam(':coordinator_id', $coordinator_id, PDO::PARAM_INT);
+$stmt->execute();
+
+// Fetch the results
+$interns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
 <link href="../assets/css/table.css" rel="stylesheet">
